@@ -1,4 +1,5 @@
 from pygame import *
+from random import randint
 
 back = (200, 255, 255)
 win_height = 500
@@ -21,10 +22,22 @@ class GameSprite(sprite.Sprite):
     def reset(self):
         window.blit(self.image, (self.rect.x, self.rect.y))
 
-zombie = GameSprite("Zombie.png", 100, 200, 80, 80)
+class Zombie(GameSprite):
+    def update(self):
+        self.rect.x -= 1
+        if self.rect.x < 0:
+            self.rect.x = win_width
+
 david = GameSprite("David.png", 500, 200, 80, 80)
 dora = GameSprite("Dora.png", 300, 200, 80, 80)
 snow_pea = GameSprite("Snowe pea.png", 400, 200, 80, 80)
+
+zombies = sprite.Group()
+zombie_min = 1
+zombie_max = 5
+for i in range(randint(zombie_min, zombie_max)):
+    zombie = Zombie("Zombie.png", randint(700, 800), randint(100, 400), 80, 80)
+    zombies.add(zombie)
 
 game_over = False
 
@@ -34,7 +47,8 @@ while True:
             exit()
 
     window.blit(background, (0, 0))
-    zombie.reset()
+    zombies.draw(window)
+    zombies.update()
     david.reset()
     dora.reset()
     snow_pea.reset()
