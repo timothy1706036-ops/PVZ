@@ -28,10 +28,23 @@ class Zombie(GameSprite):
         if self.rect.x < 0:
             self.rect.x = win_width
 
-david = GameSprite("David.png", 500, 200, 80, 80)
-dora = GameSprite("Dora.png", 300, 200, 80, 80)
-snow_pea = GameSprite("Snowe pea.png", 400, 200, 80, 80)
+class Bullet(GameSprite):
+    def fire(self):
+        pea = Pea("pea.png", self.rect.x, self.rect.y, 20, 20)
+        peas.add(pea)
 
+class Pea(GameSprite):
+    def update(self):
+        self.rect.x += 1
+        if self.rect.x > win_width:
+            self.kill()
+
+
+david = Bullet("David.png", 500, 200, 80, 80)
+dora = GameSprite("Dora.png", 300, 200, 80, 80)
+snow_pea = Pea("Snow_pea.png", 400, 200, 80, 80)
+
+peas = sprite.Group()
 zombies = sprite.Group()
 zombie_min = 1
 zombie_max = 5
@@ -41,6 +54,7 @@ for i in range(randint(zombie_min, zombie_max)):
 
 game_over = False
 
+wait_pea = 0
 while True:
     for e in event.get():
         if e.type == QUIT:
@@ -52,5 +66,18 @@ while True:
     david.reset()
     dora.reset()
     snow_pea.reset()
+    peas.draw(window)
+    peas.update()
+
+    if wait_pea == 0:
+        david.fire()
+        wait_pea = 30
+    else:
+        wait_pea -= 1
+
+
+
+
+
     display.update()
     clock.tick(60)
