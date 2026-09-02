@@ -10,6 +10,7 @@ window = display.set_mode((win_width, win_height))
 background = transform.scale(image.load("Background.png"), (win_width, win_height))
 clock = pygame.time.Clock()
 start_time = duration.time()
+level_duration = 300
 
 f = font.SysFont("arial", 22, True)
 
@@ -96,14 +97,16 @@ selected = -1       # kartu yang lagi dipegang, -1 = kosong
 sun = 50
 sun_wait = 300
 zombie_wait = 300
-game_over = False
+game_state = "playing"
 
+win_text = f.render("You Win!", True, (0, 255, 0))
+lose_text = f.render("ZOMBIES ATE YOUR BRAINS!", True, (255, 0, 0))
 while True:
     for e in event.get():
         if e.type == QUIT:
             exit()
 
-        if e.type == MOUSEBUTTONDOWN and not game_over:
+        if e.type == MOUSEBUTTONDOWN and game_state == "playing":
             mx, my = e.pos
             col = (mx - grid_x) // cell_w
             row = (my - grid_y) // cell_h
@@ -132,11 +135,11 @@ while True:
 
     window.blit(background, (0, 0))
 
-    if not game_over:
+    if game_state == "playing":
         # sun jatuh sendiri pelan-pelan
         sun_wait -= 1
         current_time = duration.time()
-        timer = 300 - (current_time - start_time)
+        remaining = max(0, int(level_duration - (current_time - start_time)))
         if sun_wait <= 0:
             sun_wait = 300
             sun += 25
@@ -157,7 +160,6 @@ while True:
         zombies.update()
 
         # pea kena zombie -> dua-duanya hilang
-        # sprite.groupcollide(peas, zombies, True, False)
         for z in zombies:
             for p in sprite.spritecollide(z, peas, True):
                 z.health -= 20
@@ -172,7 +174,11 @@ while True:
                     field.pop(p.cell, None)
                     p.kill()
             if z.rect.x < grid_x - 40:
-                game_over = True
+                game_state = "lose"
+                break
+
+        if remaining <= 0 and len(zombies) == 0:
+            game_state = "win"
 
     plants.draw(window)
     peas.draw(window)
@@ -182,10 +188,9 @@ while True:
     draw.rect(window, (120, 80, 40), (10, 8, 90 + len(cards) * 70, 84))
     window.blit(f.render("Sun", True, (255, 255, 0)), (25, 20))
     window.blit(f.render(str(sun), True, (255, 255, 0)), (25, 50))
-    remaining = max(0, int(timer))
-    minutes = remaining // 60000
-    seconds = (remaining % 60000) // 1000
-    window.blit(f.render(f"Time: {int(timer)}", True, (255, 255, 255)), (25, 80))
+    current_time = duration.time()
+    remaining = max(0, int(level_duration - (current_time - start_time)))
+    window.blit(f.render(f"Time: {remaining}", True, (255, 255, 255)), (25, 80))
     for i in range(len(cards)):
         r = card_rects[i]
         draw.rect(window, (210, 190, 140), r)
@@ -198,8 +203,10 @@ while True:
         if selected == i:
             draw.rect(window, (255, 255, 0), r, 3)
 
-    if game_over:
-        window.blit(f.render("ZOMBIES ATE YOUR BRAINS!", True, (255, 0, 0)), (180, 240))
+    if game_state == "lose":
+        window.blit(lose_text, (170, 240))
+    elif game_state == "win":
+        window.blit(win_text, (260, 240))
 
     display.update()
     clock.tick(60)
