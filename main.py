@@ -1,7 +1,7 @@
 import pygame
 from pygame import *
 from random import randint
-import time
+import time as duration
 
 init()
 win_height = 500
@@ -9,8 +9,7 @@ win_width = 700
 window = display.set_mode((win_width, win_height))
 background = transform.scale(image.load("Background.png"), (win_width, win_height))
 clock = pygame.time.Clock()
-start_time = time.time() * 1000
-timer = 120 * 60 * 1000  # 120 detik dalam milidetik
+start_time = duration.time()
 
 f = font.SysFont("arial", 22, True)
 
@@ -136,8 +135,8 @@ while True:
     if not game_over:
         # sun jatuh sendiri pelan-pelan
         sun_wait -= 1
-        current_time = time.time() * 1000
-        timer = timer - (current_time - start_time)
+        current_time = duration.time()
+        timer = 300 - (current_time - start_time)
         if sun_wait <= 0:
             sun_wait = 300
             sun += 25
@@ -178,7 +177,6 @@ while True:
     plants.draw(window)
     peas.draw(window)
     zombies.draw(window)
-    print(timer)
 
     # ---------- gambar seed bank ----------
     draw.rect(window, (120, 80, 40), (10, 8, 90 + len(cards) * 70, 84))
@@ -187,7 +185,7 @@ while True:
     remaining = max(0, int(timer))
     minutes = remaining // 60000
     seconds = (remaining % 60000) // 1000
-    window.blit(f.render(f"Time: {minutes}:{seconds:02d}", True, (255, 255, 255)), (25, 80))
+    window.blit(f.render(f"Time: {int(timer)}", True, (255, 255, 255)), (25, 80))
     for i in range(len(cards)):
         r = card_rects[i]
         draw.rect(window, (210, 190, 140), r)
